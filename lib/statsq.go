@@ -21,7 +21,7 @@ import (
 const (
 	MAX_UNPROCESSED_PACKETS = 1000
 	TCP_READ_SIZE           = 4096
-	version = "0.0.0"
+	version = "0.1.0"
 )
 
 type StatsQ struct {
