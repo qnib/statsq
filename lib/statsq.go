@@ -21,10 +21,12 @@ import (
 const (
 	MAX_UNPROCESSED_PACKETS = 1000
 	TCP_READ_SIZE           = 4096
+	version = "0.0.0"
 )
 
 type StatsQ struct {
 	Name            string
+	Version			string
 	Parser          MsgParser
 	Signalchan      chan os.Signal
 	Cfg             *config.Config
@@ -47,6 +49,7 @@ func NewStatsQ(cfg *config.Config) StatsQ {
 func NewNamedStatsQ(name string, cfg *config.Config, qchan qtypes.QChan) StatsQ {
 	sd := StatsQ{
 		Name:            name,
+		Version:  		 version,
 		Parser:          MsgParser{debug: true},
 		Signalchan:      make(chan os.Signal, 1),
 		Cfg:             cfg,
@@ -60,8 +63,6 @@ func NewNamedStatsQ(name string, cfg *config.Config, qchan qtypes.QChan) StatsQ 
 		QChan:           qchan,
 		BucketMapping:   map[string]BucketID{},
 	}
-	dump, _ := cfg.Settings()
-	sd.Log("debug", fmt.Sprintf("%v", dump))
 	sd.ReceiveCounter = sd.StringOr("receive-counter", "")
 	sd.Log("info", fmt.Sprintf("Pctls: %s", sd.StringOr("percentiles", "")))
 	for _, pctl := range strings.Split(sd.StringOr("percentiles", ""), ",") {
@@ -78,7 +79,7 @@ func (sd *StatsQ) Log(logLevel, msg string) {
 	dI := qtypes.LogStrToInt(dL)
 	lI := qtypes.LogStrToInt(logLevel)
 	if dI >= lI || debug {
-		log.Printf("[%+6s] %15s Name:%-10s >> %s", strings.ToUpper(logLevel), "statsq", sd.Name, msg)
+		log.Printf("[%+6s] %15s Name:%-10s >> %s", strings.ToUpper(logLevel), "statsq v"+sd.Version, sd.Name, msg)
 	}
 }
 
