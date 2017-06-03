@@ -1,4 +1,4 @@
-package statsdaemon
+package statsq
 
 import (
 	"github.com/stretchr/testify/assert"

@@ -13,12 +13,12 @@ BenchmarkPacketHandlerGauge-4     	10000000	       145 ns/op
 BenchmarkPacketHandlerTimer-4     	10000000	       183 ns/op
 BenchmarkPacketHandlerSet-4       	10000000	       197 ns/op
 PASS
-ok  	github.com/ChristianKniep/statsdaemon/lib	17.375s
+ok  	github.com/ChristianKniep/statsq/lib	17.375s
 ```
 
 ## Testcases
 
 ```
 $ go test -cover .
-ok  	github.com/ChristianKniep/statsdaemon/lib	0.011s	coverage: 67.2% of statements 
+ok  	github.com/ChristianKniep/statsq/lib	0.011s	coverage: 67.2% of statements 
 ```

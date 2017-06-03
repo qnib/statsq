@@ -1,25 +1,24 @@
 package main
 
 import (
-	"os"
 	"github.com/codegangsta/cli"
-	"github.com/zpatrick/go-config"
 	"github.com/qnib/statsq/lib"
+	"github.com/zpatrick/go-config"
+	"os"
 )
 
 const (
- 	VERSION = "0.0.0"
+	VERSION = "0.0.0"
 )
 
 func Run(ctx *cli.Context) {
-
 
 	cfg := config.NewConfig(
 		[]config.Provider{
 			config.NewCLI(ctx, false),
 		},
 	)
-	sd := statsdaemon.NewStatsdaemon(cfg)
+	sd := statsq.NewStatsQ(cfg)
 	sd.Run()
 }
 
@@ -91,6 +90,3 @@ func main() {
 	app.Action = Run
 	app.Run(os.Args)
 }
-
-
-

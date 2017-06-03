@@ -1,4 +1,4 @@
-package statsdaemon
+package statsq
 
 import (
 	"bytes"
@@ -41,20 +41,20 @@ func NewPreCfg(pre map[string]string) *config.Config {
 	return cfg
 }
 
-func TestNewStatsdaemonPercentiles(t *testing.T) {
+func TestNewStatsQPercentiles(t *testing.T) {
 	pre := map[string]string{"percentiles": "0.9"}
 	cfg := NewPreCfg(pre)
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 	assert.Equal(t, "[0_9]", sd.Percentiles.String())
 	pre = map[string]string{"percentiles": "0.9,0.95"}
 	cfg = NewPreCfg(pre)
-	sd = NewStatsdaemon(cfg)
+	sd = NewStatsQ(cfg)
 	assert.Equal(t, "[0_9 0_95]", sd.Percentiles.String())
 }
 
 func TestProcessGauges(t *testing.T) {
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	var buffer bytes.Buffer
 	now := int64(1418052649)
@@ -71,7 +71,7 @@ func TestProcessGauges(t *testing.T) {
 
 func TestProcessCounters(t *testing.T) {
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	var buffer bytes.Buffer
 	now := int64(1418052649)
@@ -96,7 +96,7 @@ func TestProcessCounters(t *testing.T) {
 
 func TestProcessSets(t *testing.T) {
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 	now := int64(1418052649)
 
 	var buffer bytes.Buffer
@@ -122,7 +122,7 @@ func TestProcessSets(t *testing.T) {
 func TestProcessTimers(t *testing.T) {
 	// Some data with expected mean of 20
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	sd.Timers["response_time"] = []float64{0, 30, 30}
 
@@ -146,7 +146,7 @@ func TestProcessTimers(t *testing.T) {
 func TestProcessTimersUpperPercentile(t *testing.T) {
 	pre := map[string]string{"percentiles": "75"}
 	cfg := NewPreCfg(pre)
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	// Some data with expected 75% of 2
 	sd.Timers["response_time"] = []float64{0, 1, 2, 3}
@@ -168,7 +168,7 @@ func TestProcessTimersUpperPercentilePostfix(t *testing.T) {
 		"percentiles": "75",
 	}
 	cfg := NewPreCfg(pre)
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	// Some data with expected 75% of 2
 	sd.Timers["postfix_response_time.test"] = []float64{0, 1, 2, 3}
@@ -188,7 +188,7 @@ func TestProcessTimersUpperPercentilePostfix(t *testing.T) {
 func TestProcessTimesLowerPercentile(t *testing.T) {
 	pre := map[string]string{"percentiles": "-75"}
 	cfg := NewPreCfg(pre)
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 	sd.Timers["time"] = []float64{0, 1, 2, 3}
 	now := int64(1418052649)
 	var buffer bytes.Buffer
@@ -200,9 +200,9 @@ func TestProcessTimesLowerPercentile(t *testing.T) {
 	assert.Equal(t, "time.lower_75 1 1418052649", string(lines[0]))
 }
 
-func TestStatsDaemonParseLine(t *testing.T) {
+func TestStatsQParseLine(t *testing.T) {
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 	gid := GenID("gorets")
 	sd.ParseLine("gorets:100|c")
 	assert.Equal(t, float64(100), sd.Counters[gid])
@@ -219,10 +219,10 @@ func TestStatsDaemonParseLine(t *testing.T) {
 
 }
 
-func TestStatsDaemonFanOutCounters(t *testing.T) {
+func TestStatsQFanOutCounters(t *testing.T) {
 	cfg := NewCfg()
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("", cfg, qchan)
+	sd := NewNamedStatsQ("", cfg, qchan)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
 	sd.ParseLine("gorets:100|c")
@@ -251,10 +251,10 @@ func TestStatsDaemonFanOutCounters(t *testing.T) {
 
 }
 
-func TestStatsDaemonFanOutGauges(t *testing.T) {
+func TestStatsQFanOutGauges(t *testing.T) {
 	cfg := NewCfg()
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("statsd", cfg, qchan)
+	sd := NewNamedStatsQ("statsd", cfg, qchan)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
 	sd.ParseLine("testGauge:100|g")
@@ -289,11 +289,11 @@ func TestStatsDaemonFanOutGauges(t *testing.T) {
 	assert.Equal(t, float64(20), sd.Gauges[gid])
 }
 
-func TestStatsDaemonFanOutGaugesDelete(t *testing.T) {
+func TestStatsQFanOutGaugesDelete(t *testing.T) {
 	pre := map[string]string{"statsd.delete-gauges": "true"}
 	cfg := NewPreCfg(pre)
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("statsd", cfg, qchan)
+	sd := NewNamedStatsQ("statsd", cfg, qchan)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
 	sd.ParseLine("testGauge:100|g")
@@ -324,10 +324,10 @@ func TestStatsDaemonFanOutGaugesDelete(t *testing.T) {
 	}
 }
 
-func TestStatsDaemonFanOutSets(t *testing.T) {
+func TestStatsQFanOutSets(t *testing.T) {
 	cfg := NewCfg()
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("test", cfg, qchan)
+	sd := NewNamedStatsQ("test", cfg, qchan)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
 	gid := GenID("testSet")
@@ -362,10 +362,10 @@ func TestStatsDaemonFanOutSets(t *testing.T) {
 	}
 }
 
-func TestStatsDaemonFanOutTimers(t *testing.T) {
+func TestStatsQFanOutTimers(t *testing.T) {
 	cfg := NewCfg()
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("", cfg, qchan)
+	sd := NewNamedStatsQ("", cfg, qchan)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
 	sd.ParseLine("testTimer:100|ms")
@@ -418,11 +418,11 @@ func TestStatsDaemonFanOutTimers(t *testing.T) {
 	}
 }
 
-func TestStatsDaemonFanOutTimersPercentiles(t *testing.T) {
+func TestStatsQFanOutTimersPercentiles(t *testing.T) {
 	pre := map[string]string{"percentiles": "90"}
 	cfg := NewPreCfg(pre)
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("", cfg, qchan)
+	sd := NewNamedStatsQ("", cfg, qchan)
 	now := time.Unix(1495028544, 0)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
@@ -453,13 +453,13 @@ func TestStatsDaemonFanOutTimersPercentiles(t *testing.T) {
 	}
 }
 
-func TestStatsDaemonFanOutTimersMorePercentiles(t *testing.T) {
+func TestStatsQFanOutTimersMorePercentiles(t *testing.T) {
 	pre := map[string]string{
 		"percentiles": "50,90,95,99",
 	}
 	cfg := NewPreCfg(pre)
 	qchan := qtypes.NewQChan()
-	sd := NewNamedStatsdaemon("", cfg, qchan)
+	sd := NewNamedStatsQ("", cfg, qchan)
 	now := time.Unix(1495028544, 0)
 	qchan.Broadcast()
 	dc := qchan.Data.Join()
@@ -511,7 +511,7 @@ Handling StatsdPackets*/
 
 func TestStatsdPacketHandlerGauge(t *testing.T) {
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 	sp := qtypes.NewStatsdPacket("gaugor", "333", "g")
 	sd.HandlerStatsdPacket(sp)
 	bkey := GenID("gaugor")
@@ -550,7 +550,7 @@ func TestStatsdPacketHandlerGauge(t *testing.T) {
 
 func TestStatsdPacketHandlerGaugeWithDims(t *testing.T) {
 	cfg := NewCfg()
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 	sp := qtypes.NewStatsdPacketDims("gaugor", "333", "g", qtypes.NewDimensionsPre(map[string]string{"key1": "val1"}))
 	sd.HandlerStatsdPacket(sp)
 	bkey := GenID("gaugor_key1=val1")
@@ -590,7 +590,7 @@ func TestStatsdPacketHandlerGaugeWithDims(t *testing.T) {
 func BenchmarkOneBigTimer(t *testing.B) {
 	pre := map[string]string{"statsd.percentiles": "99"}
 	cfg := NewPreCfg(pre)
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	r := rand.New(rand.NewSource(438))
 	bucket := "response_time"
@@ -607,7 +607,7 @@ func BenchmarkOneBigTimer(t *testing.B) {
 func BenchmarkLotsOfTimers(t *testing.B) {
 	pre := map[string]string{"statsd.percentiles": "99"}
 	cfg := NewPreCfg(pre)
-	sd := NewStatsdaemon(cfg)
+	sd := NewStatsQ(cfg)
 
 	r := rand.New(rand.NewSource(438))
 	for i := 0; i < 1000; i++ {

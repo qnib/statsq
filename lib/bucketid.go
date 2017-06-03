@@ -1,4 +1,4 @@
-package statsdaemon
+package statsq
 
 import (
 	"crypto/sha1"

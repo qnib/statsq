@@ -1,4 +1,4 @@
-package statsdaemon
+package statsq
 
 type Float64Slice []float64
 
