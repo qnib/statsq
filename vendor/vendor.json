@@ -18,7 +18,6 @@
 		},
 		{
 			"checksumSHA1": "pPH/BoINXxzYDObljpsGZbysMrw=",
-			"origin": "github.com/qnib/statsq/vendor/github.com/BurntSushi/toml",
 			"path": "github.com/BurntSushi/toml",
 			"revision": "b26d9c308763d68093482582cea63d69be07a0f0",
 			"revisionTime": "2017-03-28T06:15:53Z"
@@ -46,7 +45,6 @@
 		},
 		{
 			"checksumSHA1": "0f16D95P6TXnvOxFh8b2z2CPzmE=",
-			"origin": "github.com/qnib/statsq/vendor/github.com/codegangsta/cli",
 			"path": "github.com/codegangsta/cli",
 			"revision": "d70f47eeca3afd795160003bc6e28b001d60c67c",
 			"revisionTime": "2017-05-06T04:25:29Z"
@@ -408,7 +406,6 @@
 		},
 		{
 			"checksumSHA1": "m8hYD/alsufIYIM7sR06wbL+dKo=",
-			"origin": "github.com/qnib/statsq/vendor/github.com/zpatrick/go-config",
 			"path": "github.com/zpatrick/go-config",
 			"revision": "710646a45582fde23bf77bacbc2f38008dc7ffc2",
 			"revisionTime": "2016-11-18T20:29:31Z"
